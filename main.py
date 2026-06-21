@@ -1,26 +1,28 @@
 from langchain_openai import ChatOpenAI
-from flask import Flask, jsonify, request
+from fastapi import FastAPI, HTTPException
 from dotenv import load_dotenv
+
+from models.prompt_req import PromptReq
+from models.prompt_res import PromptRes
 
 load_dotenv()
 
-app = Flask(__name__)
+app = FastAPI()
 
 llm =  ChatOpenAI(model="gpt-5",temperature=0)
 
-@app.route("/ask", methods=["POST"])
-def ask():   
-    data = request.get_json()
-    prompt = data.get("prompt")
+@app.post("/chat",response_model=PromptRes)
+def chat(req:PromptReq):      
+    prompt = req.prompt
     if not prompt:
-        return jsonify({"error":"Invalid prompt"}), 400
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid prompt"
+        )
     print(f"prompt - {prompt}")
-    
+
     response = llm.invoke(prompt)
     
-    return jsonify({
-        "answer":response.content
-    })
-
-if __name__ == "__main__":
-    app.run(debug=True)
+    return PromptRes(
+        response=response.content
+    )
