@@ -1,18 +1,18 @@
 from langchain_openai import ChatOpenAI
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends
 from dotenv import load_dotenv
 
 from models.prompt_req import PromptReq
 from models.prompt_res import PromptRes
+from services.llm_service import LLMService
+from dependencies.services import get_llm_service
 
 load_dotenv()
 
 app = FastAPI()
 
-llm =  ChatOpenAI(model="gpt-5",temperature=0)
-
 @app.post("/chat",response_model=PromptRes)
-def chat(req:PromptReq):      
+def chat(req:PromptReq,llm_service:LLMService =  Depends(get_llm_service)):      
     prompt = req.prompt
     if not prompt:
         raise HTTPException(
@@ -21,8 +21,8 @@ def chat(req:PromptReq):
         )
     print(f"prompt - {prompt}")
 
-    response = llm.invoke(prompt)
+    response = llm_service.generate_response(prompt)
     
     return PromptRes(
-        response=response.content
+        response=response
     )
