@@ -8,5 +8,7 @@ dependencies = [
     "langchain>=0.3.30",
     "langchain-openai>=0.3.35",
     "langchain-pinecone>=0.2.13",
+    "greenlet>=3.0.0,<3.1.0",
     "python-dotenv>=1.2.1",
+    "flask>=3.1.3",
 ]
